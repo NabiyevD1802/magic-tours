@@ -13,11 +13,23 @@ app.use('/api/v1/users', userRouter);
 app.use(express.static('public'));
 
 app.all('*', (res, req, next) => {
-  res.status(404).json({
+  const err = {
+    sttusCode: 404,
     status: 'FAIL',
-    message: 'Bunday route mavjud emas',
+    message: `this url has not found: ${req.originalUrl}`,
+  };
+  next(err);
+});
+
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 404;
+  err.status = err.status || 'FAIL';
+  err.message = err.message || 'Not found';
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
   });
-  next();
 });
 
 module.exports = app;
